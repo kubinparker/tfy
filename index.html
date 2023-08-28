@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Merge and Resize Videos</title>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+</head>
+<body>
+  <script>
+    $.ajax({
+      url:'https://savetiktok.io/api/video-info',
+      type:'post',
+      data: {url: "https://www.tiktok.com/video/7265456370151869738"},
+      dataType:'json',
+      success: resp => console.log(resp)
+    });
+  </script>
+</body>
+</html>

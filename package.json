@@ -1,0 +1,15 @@
+{
+  "name": "tfy",
+  "version": "1.0.0",
+  "description": "tiktok-facebook-youtube",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.5",
+    "@ffmpeg/util": "^0.12.0"
+  }
+}
