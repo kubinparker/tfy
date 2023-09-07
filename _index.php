@@ -110,10 +110,10 @@ try {
         'timeout'          => 3600,
         'ffmpeg.threads'   => 12,
     ]);
-    $video = $ffmpeg->open('./videos/movies/movie_7120770257710566699.mp4');
-    $array_video = ['./videos/movies/movie_7120770257710566699.mp4', './videos/movies/movie_7207264504210558235.mp4', './videos/movies/movie_7212813733624630571.mp4', './videos/movies/movie_7213657867071606018.mp4'];
+    // $video = $ffmpeg->open('./videos/movies/movie_7120770257710566699.mp4');
+    // $array_video = ['./videos/movies/movie_7120770257710566699.mp4', './videos/movies/movie_7207264504210558235.mp4', './videos/movies/movie_7212813733624630571.mp4', './videos/movies/movie_7213657867071606018.mp4'];
 
-    $format = new FFMpeg\Format\Video\X264();
+    // $format = new FFMpeg\Format\Video\X264();
     // $format->setAudioCodec("libmp3lame");
 
     // ghép nhiều video 
@@ -125,16 +125,16 @@ try {
 
     // ghép nhiều video và thêm hiệu ứng
 
-    $advancedMedia = $ffmpeg->openAdvanced($array_video);
-    $advancedMedia->filters()
-        ->custom('[0:v]', 'negate', '[v0negate]')
-        ->custom('[1:v]', 'edgedetect', '[v1edgedetect]')
-        ->custom('[2:v]', 'hflip', '[v2hflip]')
-        ->custom('[3:v]', 'vflip', '[v3vflip]')
-        ->xStack('[v0negate][v1edgedetect][v2hflip][v3vflip]', FFMpeg\Filters\AdvancedMedia\XStackFilter::LAYOUT_2X2, 4, '[resultv]');
-    $advancedMedia
-        ->map(array('[resultv]'), $format, './output3.mp4')
-        ->save();
+    // $advancedMedia = $ffmpeg->openAdvanced($array_video);
+    // $advancedMedia->filters()
+    //     ->custom('[0:v]', 'negate', '[v0negate]')
+    //     ->custom('[1:v]', 'edgedetect', '[v1edgedetect]')
+    //     ->custom('[2:v]', 'hflip', '[v2hflip]')
+    //     ->custom('[3:v]', 'vflip', '[v3vflip]')
+    //     ->xStack('[v0negate][v1edgedetect][v2hflip][v3vflip]', FFMpeg\Filters\AdvancedMedia\XStackFilter::LAYOUT_2X2, 4, '[resultv]');
+    // $advancedMedia
+    //     ->map(array('[resultv]'), $format, './output3.mp4')
+    //     ->save();
     // kết thúc 
 
     // thêm logo ở góc trên bên trái
@@ -177,6 +177,30 @@ try {
     //     ->save();
 
     // kết thúc 
+
+    // gep nhac vao video
+
+    // 1. lay thoi gian doan nhac
+    $inputAudioPath = __DIR__ . '/audios/thu-cuoi2.mp3';
+    // $ffprobe = FFMpeg\FFProbe::create(['ffprobe.binaries' => './libs/ffprobe']);
+    // $audioDuration = $ffprobe
+    //     ->format($inputAudioPath)
+    //     ->get('duration');
+    // kết thúc 1.
+
+    // 2. ghep va lap video cho den het nhac
+    $inputVideoPath = __DIR__ . '/videos/results/merge/movie_7120770247710566699_7207264504210558235.mp4';
+
+    $outputPath = __DIR__ . '/videos/results/outputVideo4.mp4';
+
+    $loop = ceil(504 / 22);
+    // ghep dc nhac vao nhung video chua lap lai den het nhac
+    // su dung opt "-shortest" de dong bo nhac va video. cai nao ngan hon se dc uu tien. chay het se dung` 
+    shell_exec(__DIR__ . "/libs/ffmpeg -stream_loop " . $loop . " -i " . $inputVideoPath . " -i " . $inputAudioPath . " -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 " . $outputPath);
+
+    // kết thúc 2.
+    // ket thuc
+
 } catch (Exception $e) {
     print_r($e->getMessage());
 }
