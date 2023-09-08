@@ -3,6 +3,8 @@ require './vendor/autoload.php';
 
 $today = (new DateTime())->format('Ymd');
 $json_file = "./data/data_tiktok_" . $today . ".json";
+
+
 // dữ liệu truyền từ console của tiktok.com về
 if ($_POST['datas']) {
     // lưu vào thành file json có tên là data/data_tiktok_<date>.json
@@ -100,16 +102,80 @@ function dd($pr)
     exit();
 }
 
-// download video về thành công thì xử lý cắt ghép chỉnh sửa video
 
-try {
-    $ffmpeg = FFMpeg\FFMpeg::create([
+function getFFMpeg($timeout = 3600, $threads = 12)
+{
+    return FFMpeg\FFMpeg::create([
         'ffmpeg.binaries' => './libs/ffmpeg',
         'ffprobe.binaries' => './libs/ffprobe',
         'temporary_directory' => './var/ffmpeg-tmp',
-        'timeout'          => 3600,
-        'ffmpeg.threads'   => 12,
+        'timeout'          => $timeout,
+        'ffmpeg.threads'   => $threads
     ]);
+}
+
+
+// $duration: số giây được cắt ra
+function getGifFromVideo($path, $from = 0, $duration = 10, $new_path = './images/start_with.gif')
+{
+    $ffmpeg = getFFMpeg();
+    $video = $ffmpeg->open($path);
+    $video
+        ->gif(FFMpeg\Coordinate\TimeCode::fromSeconds($from), new FFMpeg\Coordinate\Dimension(640, 480), $duration)
+        ->save($new_path);
+}
+
+
+function convertAndMerImageToGif()
+{
+    $frameDir = './frames/';
+    $pth = $frameDir . '*.png';
+    $frames = glob($frameDir . '*.png');
+    $outputGif = 'output.gif';
+    exec('/usr/local/bin/convert -delay 10 -loop 0 ' . $pth . ' ./' . $outputGif);
+
+    // // Khởi tạo hoạt hình GIF
+    // $imagick = new Imagick();
+
+    // foreach ($frames as $i => $frame) {
+
+    // if ($i < 24 || $i > 240) {
+    //     echo $i . '<br>';
+    //     exec('/usr/local/bin/convert ./' . $frame . ' -edge 1 ./' . $frame);
+    // }
+    // if (($i >= 24 && $i < 48) || ($i > 224 && $i < 240)) {
+    //     echo $i . '<br>';
+    //     exec('/usr/local/bin/convert ./ ' . $frame . ' -canny 0x1+10%+30% ./' . $frame);
+    // }
+
+    // $image = new Imagick($frame);
+
+    // if (($i >= 48 && $i < 72) || ($i > 224 && $i < 240)) {
+    //     echo $i . '<br>';
+    //     exec('/usr/local/bin/convert ./ ' . $frame . ' -colorspace Gray -negate -edge 1 -negate ./' . $frame);
+    //     // $image->edgeImage(2);
+    // }
+    // $imagick->addImage($image);
+
+    // $image->clear();
+    // $image->destroy();
+    // }
+
+    // $imagick->writeImages($outputGif, true);
+    // $imagick->clear();
+    // $imagick->destroy();
+}
+
+// download video về thành công thì xử lý cắt ghép chỉnh sửa video
+try {
+    $ffmpeg = getFFMpeg();
+
+    convertAndMerImageToGif();
+
+    // tao anh gif tu video
+    // getGifFromVideo('./videos/movies/movie_7207264504210558235.mp4', 3, 7);
+    // ket thuc
+
     // $video = $ffmpeg->open('./videos/movies/movie_7120770257710566699.mp4');
     // $array_video = ['./videos/movies/movie_7120770257710566699.mp4', './videos/movies/movie_7207264504210558235.mp4', './videos/movies/movie_7212813733624630571.mp4', './videos/movies/movie_7213657867071606018.mp4'];
 
@@ -181,22 +247,22 @@ try {
     // gep nhac vao video
 
     // 1. lay thoi gian doan nhac
-    $inputAudioPath = __DIR__ . '/audios/thu-cuoi2.mp3';
-    // $ffprobe = FFMpeg\FFProbe::create(['ffprobe.binaries' => './libs/ffprobe']);
-    // $audioDuration = $ffprobe
-    //     ->format($inputAudioPath)
-    //     ->get('duration');
-    // kết thúc 1.
+    // $inputAudioPath = __DIR__ . '/audios/thu-cuoi2.mp3';
+    // // $ffprobe = FFMpeg\FFProbe::create(['ffprobe.binaries' => './libs/ffprobe']);
+    // // $audioDuration = $ffprobe
+    // //     ->format($inputAudioPath)
+    // //     ->get('duration');
+    // // kết thúc 1.
 
-    // 2. ghep va lap video cho den het nhac
-    $inputVideoPath = __DIR__ . '/videos/results/merge/movie_7120770247710566699_7207264504210558235.mp4';
+    // // 2. ghep va lap video cho den het nhac
+    // $inputVideoPath = __DIR__ . '/videos/results/merge/movie_7120770247710566699_7207264504210558235.mp4';
 
-    $outputPath = __DIR__ . '/videos/results/outputVideo4.mp4';
+    // $outputPath = __DIR__ . '/videos/results/outputVideo4.mp4';
 
-    $loop = ceil(504 / 22);
-    // ghep dc nhac vao nhung video chua lap lai den het nhac
-    // su dung opt "-shortest" de dong bo nhac va video. cai nao ngan hon se dc uu tien. chay het se dung` 
-    shell_exec(__DIR__ . "/libs/ffmpeg -stream_loop " . $loop . " -i " . $inputVideoPath . " -i " . $inputAudioPath . " -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 " . $outputPath);
+    // $loop = ceil(504 / 22);
+    // // ghep dc nhac vao nhung video chua lap lai den het nhac
+    // // su dung opt "-shortest" de dong bo nhac va video. cai nao ngan hon se dc uu tien. chay het se dung` 
+    // shell_exec(__DIR__ . "/libs/ffmpeg -stream_loop " . $loop . " -i " . $inputVideoPath . " -i " . $inputAudioPath . " -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 " . $outputPath);
 
     // kết thúc 2.
     // ket thuc
